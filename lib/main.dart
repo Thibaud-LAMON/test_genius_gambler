@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        scaffoldBackgroundColor: const Color(0xFFECF1FF),
         useMaterial3: true,
       ),
       home: const MyHomePage(),
@@ -35,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 100,
         title: Row(
           children: [
             const Stack(
@@ -62,9 +63,48 @@ class _MyHomePageState extends State<MyHomePage> {
                       Text(' 433')
                     ]
                   ),
-                  Container(
-                      child: Text('Jean Dupont')
-                  )
+                  Stack(
+                    clipBehavior: Clip.none, // Permet au conteneur superposé de déborder
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF7584FF),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: const Text(
+                          'Champion',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      // Conteneur "# Rang" positionné à droite et partiellement superposé
+                      Positioned(
+                        right: -50, // Ajuste la valeur pour obtenir le chevauchement souhaité
+                        top: 0,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: const Color(0xFF7584FF)), // Bordure bleue
+                            borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(5), // Coins droits arrondis
+                              bottomRight: Radius.circular(5),
+                            ),
+                          ),
+                          child: const Text(
+                            '#64', // Remplace par le rang dynamique
+                            style: TextStyle(
+                              color: Color(0xFF7584FF),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             )
@@ -86,13 +126,31 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: Container(
-        color: Color(0xFFECF1FF),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Container(
-
-            )
+            const Text('CLASSEMENT \nAMIS',
+              style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF7584FF)
+              ),
+            ),
+            const Text(
+              'Compare ton classement avec tes amis et regarde lequel est le meilleur d\'entre vous',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF364F6B),
+              ),
+            ),
+            Expanded(
+                child:ListView.builder(
+                    itemBuilder:
+                )
+            ),
           ],
         ),
       ),
