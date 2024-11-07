@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "749415324466",
+    "project_id": "test-genius-gambler",
+    "storage_bucket": "test-genius-gambler.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:749415324466:android:7e31f42ac32e0ad4b8952b",
+        "android_client_info": {
+          "package_name": "com.example.test_technique"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcTmahGofoEIYfdrm8gZQI9wyJ6otuatE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

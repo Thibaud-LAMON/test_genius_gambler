@@ -1,7 +1,23 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:test_technique/services/firestore_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if(kIsWeb) {
+    await Firebase.initializeApp(
+        options: const FirebaseOptions(
+            apiKey: "AIzaSyAQ7NPqv8fwM5dz2UuoRYQ8YBv2WxYqy6U",
+            authDomain: "test-genius-gambler.firebaseapp.com",
+            projectId: "test-genius-gambler",
+            storageBucket: "test-genius-gambler.firebasestorage.app",
+            messagingSenderId: "749415324466",
+            appId: "1:749415324466:web:80cc5b525587a20eb8952b"));
+  }else{
+    await Firebase.initializeApp();
+  }
   runApp(const MyApp());
 }
 
@@ -30,6 +46,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final FirestoreService firestoreService = FirestoreService();
 
   @override
   Widget build(BuildContext context) {
@@ -147,9 +164,30 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             Expanded(
-                child:ListView.builder(
-                    itemBuilder:
-                )
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: firestoreService.getLeaderboard(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('Aucun utilisateur trouvé'));
+                  } else {
+                    final users = snapshot.data!;
+                    return ListView.builder(
+                      itemCount: users.length,
+                      itemBuilder: (context, index) {
+                        final user = users[index];
+                        return ListTile(
+                          title: Text(user['username']),
+                          trailing: Text(user['score'].toString()),
+                        );
+                      },
+                    );
+                  }
+                },
+              )
             ),
           ],
         ),
