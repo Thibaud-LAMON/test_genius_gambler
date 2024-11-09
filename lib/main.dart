@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:test_technique/profile_page.dart';
 import 'package:test_technique/services/firestore_service.dart';
 
 void main() async {
@@ -21,19 +23,51 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<StatefulWidget> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState(){
+    super.initState();
+    initializeGoRouter();
+  }
+
+  late GoRouter _router;
+
+  initializeGoRouter() {
+    _router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const MyHomePage(),
+        ),
+        GoRoute(
+          path: '/profile-page',
+          builder: (context, state){
+            String username = state.extra as String;
+            return ProfilePage(username: username);
+          }
+        )
+      ]
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         scaffoldBackgroundColor: const Color(0xFFECF1FF),
         useMaterial3: true,
       ),
-      home: const MyHomePage(),
+      routerConfig: _router,
     );
   }
 }
