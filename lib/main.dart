@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:test_technique/profile_page.dart';
 import 'package:test_technique/services/firestore_service.dart';
 
 void main() async {
@@ -21,19 +23,51 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<StatefulWidget> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState(){
+    super.initState();
+    initializeGoRouter();
+  }
+
+  late GoRouter _router;
+
+  initializeGoRouter() {
+    _router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const MyHomePage(),
+        ),
+        GoRoute(
+          path: '/profile-page',
+          builder: (context, state){
+            String username = state.extra as String;
+            return ProfilePage(username: username);
+          }
+        )
+      ]
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         scaffoldBackgroundColor: const Color(0xFFECF1FF),
         useMaterial3: true,
       ),
-      home: const MyHomePage(),
+      routerConfig: _router,
     );
   }
 }
@@ -64,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   strokeWidth: 8,
                 ),
                 CircleAvatar(
-                  backgroundColor: Colors.orange,
+                  backgroundColor: Color(0xFFEE9714),
                   backgroundImage: AssetImage('assets/person.png'),
                 ),
               ],
@@ -80,14 +114,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       const Text(' 433')
                     ]
                   ),
-                  Stack(
-                    clipBehavior: Clip.none, // Permet au conteneur superposé de déborder
-                    children: [
+                  Row(
+                    children:[
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF7584FF),
-                          borderRadius: BorderRadius.circular(5),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF7584FF),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(5),
+                            bottomLeft: Radius.circular(5),
+                          ),
                         ),
                         child: const Text(
                           'Champion',
@@ -97,29 +133,28 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ),
                       ),
-                      Positioned(
-                        right: -50, // Ajuste la valeur pour obtenir le chevauchement souhaité
-                        top: 0,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: const Color(0xFF7584FF)),
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(5),
-                              bottomRight: Radius.circular(5),
-                            ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: const Color(0xFF7584FF)),
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(5),
+                            bottomRight: Radius.circular(5),
                           ),
-                          child: const Text(
-                            '#64',
-                            style: TextStyle(
-                              color: Color(0xFF7584FF),
-                              fontWeight: FontWeight.bold,
-                            ),
+                        ),
+                        child: const Text(
+                          '#64',
+                          style: TextStyle(
+                            color: Color(0xFF7584FF),
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                    ],
+                    ]
                   ),
                 ],
               ),
@@ -136,7 +171,12 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               child: TextButton.icon(
                 icon: SvgPicture.asset('assets/shop.svg'),
-                label: const Text('Boutique', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF364F6B))),
+                label: const Text('Boutique',
+                    style: TextStyle(fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF364F6B)
+                    )
+                ),
                 onPressed: () {
                   print('Boutique');
                 },
@@ -167,7 +207,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   SizedBox(height: 8), // Espacement
                   Text(
-                    'Compare ton classement avec tes amis et regarde lequel est le meilleur d\'entre vous',
+                    'Compare ton classement avec tes amis et regarde lequel '
+                    'est le meilleur d\'entre vous',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -207,51 +248,61 @@ class _MyHomePageState extends State<MyHomePage> {
                         final textColor = isCurrentUser ? Colors.white : const Color(0xFF364F6B);
                         return Card(
                           color: isCurrentUser ? const Color(0xFF7584FF) : Colors.white,
-                          child: ListTile(
-                            leading: Text(
-                              '${index + 1} /',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                                color: textColor ,
-                              ),
-                            ),
-                            title: Row(
-                              children: [
-                                const CircleAvatar(
-                                  backgroundImage: AssetImage('assets/person.png'),
-                                ),
-                                Expanded(child: Text(
-                                    ' ${user['username']}',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: textColor // pour que ça marche, le TextStyle() ne doit pas être un const
-                                    ),
-                                    overflow: TextOverflow.ellipsis //si le nom déborde, il est tronqué
+                          child: InkWell(
+                            onTap: (){
+                              context.go('/profile-page', extra: user['username']);
+                            },
+                            child: ListTile(
+                                leading: Text(
+                                  '${index + 1} /',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w900,
+                                    color: textColor ,
                                   ),
                                 ),
-                              ],
-                            ),
-                            trailing: ConstrainedBox(
-                              /// ConstrainedBox permet de définir des contraintes de taille sur un widget enfant
-                              /// Ici, on limite la largeur du widget enfant à 100 sur l'axe horizontal
-                                constraints: const BoxConstraints(maxWidth: 100),
-                                child:Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                title: Row(
                                   children: [
-                                    Text(
-                                      '${user['score']} ',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: textColor,
-                                      ),
+                                    const CircleAvatar(
+                                      backgroundImage: AssetImage('assets/person.png'),
                                     ),
-                                    SvgPicture.asset('assets/coins.svg', width: 20, height: 20),
+                                    Expanded(child: Text(
+                                        ' ${user['username']}',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: textColor // pour que ça marche, le TextStyle() ne doit pas être un const
+                                        ),
+                                        overflow: TextOverflow.ellipsis //si le nom déborde, il est tronqué
+                                    ),
+                                    ),
                                   ],
+                                ),
+                                trailing: ConstrainedBox(
+                                  /// ConstrainedBox permet de définir des contraintes
+                                  /// de taille sur un widget enfant.
+                                  /// Ici, on limite la largeur du widget enfant
+                                  /// à 100 sur l'axe horizontal.
+                                    constraints: const BoxConstraints(maxWidth: 100),
+                                    child:Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '${user['score']} ',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: textColor,
+                                          ),
+                                        ),
+                                        SvgPicture.asset('assets/coins.svg',
+                                            width: 20,
+                                            height: 20
+                                        ),
+                                      ],
+                                    )
                                 )
-                            )
+                            ),
                           ),
                         );
                       },
@@ -292,7 +343,7 @@ class _MyHomePageState extends State<MyHomePage> {
         unselectedItemColor: Color(0xFFADADAD),
         currentIndex: 0,
         onTap: (index) {
-          // Handle your navigation here
+          // Gestion de la navigation de la BottomNavigationBar
         },
       ),
     );

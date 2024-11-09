@@ -11,4 +11,16 @@ class FirestoreService {
 
     return querySnapshot.docs.map((doc) => doc.data()).toList();
   }
+
+  Future<Map<String, dynamic>?> getPlayerData(String username) async{
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('username', isEqualTo: username)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      return querySnapshot.docs.first.data();
+    }
+    return null; // Aucun document trouvé
+  }
 }
